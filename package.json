@@ -3,10 +3,21 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "start": "bun run src/index.tsx",
+    "dev": "bun --inspect src/index.tsx",
+    "openapi-ts": "openapi-ts"
+  },
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.80.1",
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "ink": "^6.1.0",
+    "react": "^19.1.1"
   }
 }
