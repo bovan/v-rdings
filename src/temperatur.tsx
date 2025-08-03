@@ -1,0 +1,228 @@
+import { fetchAirTemperatures, Stasjon, type AirTemperature } from "./db/frost";
+import { Box, Text, useApp, useInput } from "ink";
+import { useCallback, useEffect, useState } from "react";
+import { formatDistance } from "date-fns";
+import Container from "./components/container";
+import useSources from "./hooks/use-stasjoner";
+import Spinner from "ink-spinner";
+
+function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) {
+    return "--";
+  }
+  const recentDate = new Date(dateString);
+  const distance = formatDistance(recentDate, new Date(), { addSuffix: true });
+  return distance;
+}
+
+function getDateColor(
+  dateString: string | null | undefined,
+): "green" | "yellow" | "orange" | "red" | "grey" {
+  if (!dateString) {
+    return "grey";
+  }
+  const recentDate = new Date(dateString).getTime();
+  const currentDate = new Date().getTime();
+  if (recentDate > currentDate - 1000 * 60 * 60 * 0.5) {
+    return "green";
+  } else if (recentDate > currentDate - 1000 * 60 * 60 * 1) {
+    return "yellow";
+  } else if (recentDate > currentDate - 1000 * 60 * 60 * 2) {
+    return "orange";
+  } else {
+    return "red";
+  }
+}
+
+const sortType = ["Sted", "Temperatur", "Oppdatert"] as const;
+type SortType = (typeof sortType)[number];
+
+export type StasjonTemp = { source: Stasjon; temp?: AirTemperature };
+
+function combineList(
+  sources: Stasjon[],
+  temperatures: AirTemperature[],
+  sortedBy: SortType,
+): StasjonTemp[] {
+  const data = sources.map((source) => {
+    return {
+      source: source,
+      temp: temperatures.find((temp) => temp.sourceId === source.id),
+    };
+  });
+  if (sortedBy === "Sted") {
+    return data.sort((a, b) => a.source.name.localeCompare(b.source.name));
+  } else if (sortedBy === "Temperatur") {
+    return data.sort((a, b) => {
+      const aVal = a.temp?.observations[0]?.value;
+      const bVal = b.temp?.observations[0]?.value;
+      if (!aVal) {
+        return 1;
+      }
+      if (!bVal) {
+        return -1;
+      }
+      return parseFloat(bVal) - parseFloat(aVal);
+    });
+  } else if (sortedBy === "Oppdatert") {
+    return data.sort((a, b) => {
+      const aTime = a.temp?.referenceTime ?? "";
+      const bTime = b.temp?.referenceTime ?? "";
+      return bTime.localeCompare(aTime);
+    });
+  }
+  return [];
+}
+
+export default function Temperatur() {
+  const [airTemperatures, setAirTemperatures] = useState<AirTemperature[]>([]);
+  const [sortedBy, setSortedBy] = useState<SortType>("Sted");
+  const { stasjoner } = useSources();
+  const [rerender, setRerender] = useState(0);
+  const favoritter = stasjoner?.filter((s) => s.favoritt) ?? [];
+  const [initial, setInitial] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // update the view every minute so the updated times are refreshed
+    const reRenderView = () => {
+      setRerender((prev) => prev + 1);
+      if (rerender % 5 === 0) {
+        updateTemperatures();
+      }
+    };
+    const timer = setInterval(reRenderView, 1000 * 60);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!initial && favoritter.length > 0) {
+      updateTemperatures();
+      setInitial(true);
+    }
+  }, [favoritter]);
+
+  const updateTemperatures = useCallback(() => {
+    setIsLoading(true);
+    const ids = favoritter.map((source) => source.id);
+    fetchAirTemperatures(ids)
+      .then((newTemps) => {
+        setAirTemperatures(newTemps);
+      })
+      .finally(() => setIsLoading(false));
+  }, [favoritter]);
+
+  useInput((input) => {
+    switch (input) {
+      case "r": {
+        updateTemperatures();
+        break;
+      }
+      case "s": {
+        if (sortedBy === "Sted") {
+          setSortedBy("Temperatur");
+        } else if (sortedBy === "Temperatur") {
+          setSortedBy("Oppdatert");
+        } else {
+          setSortedBy("Sted");
+        }
+        break;
+      }
+    }
+  });
+
+  const data = combineList(favoritter, airTemperatures, sortedBy);
+
+  return (
+    <Container>
+      <Box gap={2} paddingBottom={1}>
+        <Box width={24}>
+          <Text color={sortedBy === "Sted" ? "green" : "white"} bold={true}>
+            Sted
+          </Text>
+        </Box>
+        <Box width={5}>
+          <Text color={sortedBy === "Temperatur" ? "green" : "white"}>
+            Temp
+          </Text>
+        </Box>
+        <Box width={20}>
+          <Text color={sortedBy === "Oppdatert" ? "green" : "white"}>
+            Oppdatert
+          </Text>
+        </Box>
+      </Box>
+      {data.map((item) => (
+        <StasjonTempRow
+          key={item.source.id}
+          item={item}
+          isLoading={isLoading}
+        />
+      ))}
+      {stasjoner === null && <Spinner type="aesthetic" />}
+      {stasjoner?.length === 0 && (
+        <Text color="redBright">
+          Ingen målestasjoner. Legg til via 2) Kommune først, så 3)
+          Målestasjoner
+        </Text>
+      )}
+      <Box
+        borderTop={true}
+        borderLeft={false}
+        borderRight={false}
+        borderBottom={false}
+        borderStyle="single"
+        justifyContent="space-between"
+      >
+        <Box gap={2}>
+          {favoritter.length > 0 && (
+            <Text>
+              <Text color="whiteBright">r)</Text>efresh
+            </Text>
+          )}
+          {favoritter.length > 0 && (
+            <Text>
+              <Text color="whiteBright">s)</Text>ort
+            </Text>
+          )}
+        </Box>
+        <Box>
+          <Text>Oppdateres automatisk om {5 - (rerender % 5)} min</Text>
+        </Box>
+      </Box>
+    </Container>
+  );
+}
+
+function StasjonTempRow({
+  item,
+  isLoading,
+}: {
+  item: StasjonTemp;
+  isLoading: boolean;
+}) {
+  const observation = item.temp?.observations[0]?.value ?? "--";
+  const referenceTime = formatDate(item.temp?.referenceTime);
+  const dateColor = getDateColor(item.temp?.referenceTime);
+  const isOld = dateColor === "grey";
+
+  return (
+    <Box key={item.source.id} gap={2}>
+      <Box width={24}>
+        <Text color={isOld ? "grey" : "white"}>{item.source.name}</Text>
+      </Box>
+      <Box width={5}>
+        <Text color={isOld ? "grey" : "cyan"}>{observation}</Text>
+      </Box>
+      <Box width={22}>
+        {isLoading ? (
+          <Spinner type="aesthetic" />
+        ) : (
+          <Text color={getDateColor(item.temp?.referenceTime)}>
+            {referenceTime}
+          </Text>
+        )}
+      </Box>
+    </Box>
+  );
+}

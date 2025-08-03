@@ -9,18 +9,43 @@ const username = process.env["CLIENT_ID"];
 const password = process.env["CLIENT_SECRET"];
 const headers = { Authorization: "Basic " + btoa(username + ":" + password) };
 
-export type YrSource = Required<Source>;
+export type Stasjon = Pick<Required<Source>, "id" | "name" | "shortName"> & {
+  kommunenavn: string;
+  favoritt: boolean;
+};
+function isStasjonCompatible<
+  T extends { id?: unknown; name?: unknown; shortName?: unknown },
+>(obj: Partial<T> | undefined | null): obj is Required<T> {
+  return (
+    !!obj &&
+    obj.id !== undefined &&
+    obj.name !== undefined &&
+    obj.shortName !== undefined
+  );
+}
 
-export async function fetchSources(): Promise<YrSource[]> {
+export async function fetchSources(kommunenavn: string): Promise<Stasjon[]> {
   return fetch(
-    "https://frost.met.no/sources/v0.jsonld?municipality=Trondheim",
+    `https://frost.met.no/sources/v0.jsonld?municipality=${kommunenavn}`,
     {
       method: "GET",
       headers,
     },
   )
-    .then((response) => response.json() as Promise<SourceResponse>)
-    .then((sources) => (sources.data ?? []) as Required<Source>[]);
+    .then((response) => response.json() as Promise<Required<SourceResponse>>)
+    .then((sources) => {
+      const data: Omit<Stasjon, "favoritt" | "kommunenavn">[] =
+        sources.data.filter(isStasjonCompatible);
+      return data.map((source) => {
+        return {
+          id: source.id,
+          name: source.name,
+          shortName: source.shortName,
+          kommunenavn: kommunenavn,
+          favoritt: false,
+        } satisfies Stasjon;
+      });
+    });
 }
 
 export type AirTemperature = Required<ObservationsAtRefTime>;

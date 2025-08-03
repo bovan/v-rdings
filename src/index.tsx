@@ -1,7 +1,9 @@
 import { render } from "ink";
 import App from "./app";
-import { dbClose } from "./db/db";
+import { dbInit } from "./db/db";
 
+dbInit();
 const { waitUntilExit } = render(<App />);
+
 await waitUntilExit();
-console.log("Goodbye!");
+console.log("Takk for nå!");
