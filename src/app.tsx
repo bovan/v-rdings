@@ -3,6 +3,7 @@ import Temperatur from "./temperatur";
 import { useState } from "react";
 import Kommunevalg from "./kommunevalg";
 import Stasjoner from "./stasjoner";
+import ShortcutText from "./components/shortcut-text";
 
 const pages = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
 type Page = (typeof pages)[number];
@@ -42,18 +43,10 @@ export default function App() {
           <Text>bovans værdings</Text>
         </Box>
         <Box gap={2}>
-          <Text>
-            <Text color="whiteBright">1)</Text> Temperatur
-          </Text>
-          <Text>
-            <Text color="whiteBright">2)</Text> Kommuner
-          </Text>
-          <Text>
-            <Text color="whiteBright">3)</Text> Målestasjoner
-          </Text>
-          <Text>
-            <Text color="whiteBright">Ctrl-C)</Text> Avslutt
-          </Text>
+          <ShortcutText input="1" description="Temperatur" />
+          <ShortcutText input="2" description="Kommuner" />
+          <ShortcutText input="3" description="Målestasjoner" />
+          <ShortcutText input="Ctrl-C" description="Avslutt" />
         </Box>
       </Box>
       {activePage === "Kommuner" && <Kommunevalg />}
