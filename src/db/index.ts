@@ -9,21 +9,6 @@ import { fetchKommuner, Kommune } from "./geonorge";
 
 export async function getStasjoner(kommunenavn: string): Promise<Stasjon[]> {
   return selectStasjoner(kommunenavn);
-  // if (dbSources.length > 0) {
-  //   return dbSources;
-  // }
-  // return [];
-  // }
-  // const data = await fetchSources(kommunenavn);
-  // const stasjoner = data.map(({ id, name, shortName }) => ({
-  //   id,
-  //   name,
-  //   shortName,
-  //   favoritt: false,
-  // }));
-  // insertStasjoner(data);
-
-  // return stasjoner;
 }
 
 export async function fetchAndAddSources(
