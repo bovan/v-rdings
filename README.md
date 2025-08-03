@@ -6,6 +6,32 @@ A simple CLI app I made because I wanted to use data from Yr.no
 Then I got sidetracked and made a CLI tool that can be used to get weather data
 because I found the idea of using React in terminal to be kinda fun.
 
+## Description
+
+### Kommuner (Municipalities)
+
+First one should go to Kommuner and select the municipality you want to get data for.
+
+![Kommuner](./docs/kommuner.png)
+
+The app will then fetch the data from frost.met.no and create a database
+containing the measuring stations for those municipalities.
+
+### Målestasjoner (Measurement stations)
+
+This enables the selection of a specific measurement station.
+Some are updated at a too slow of interval to be useful, so you can select
+the ones you want to use.
+
+![Stasjoner](./docs/stasjoner.png)
+
+### Temperatur (Temperature)
+
+After selecting a municipality and a measurement station, you can
+retrieve the temperature data for those stations.
+
+![Temperatur](./docs/temperatur.png)
+
 ## How to run
 
 Install bun if you don't have it already:
