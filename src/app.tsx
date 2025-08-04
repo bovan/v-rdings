@@ -1,32 +1,30 @@
 import { Box, Text, useInput } from "ink";
 import Temperatur from "./temperatur";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import Kommunevalg from "./kommunevalg";
 import Stasjoner from "./stasjoner";
 import ShortcutText from "./components/shortcut-text";
 
-const _pages = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
-type Page = (typeof _pages)[number];
+const pageKeys = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
+type PageKey = (typeof pageKeys)[number];
+
+type Page = { shortcut: string; page: PageKey; component: JSX.Element };
+const pages: Page[] = [
+  { shortcut: "1", page: "Temperatur", component: <Temperatur /> },
+  { shortcut: "2", page: "Kommuner", component: <Kommunevalg /> },
+  { shortcut: "3", page: "Målestasjoner", component: <Stasjoner /> },
+];
 
 export default function App() {
-  const [activePage, setActivePage] = useState<Page>("Temperatur");
+  const [activePage, setActivePage] = useState<Page>(pages[0]!);
 
   useInput((input) => {
-    switch (input) {
-      case "1": {
-        setActivePage("Temperatur");
-        break;
-      }
-      case "2": {
-        setActivePage("Kommuner");
-        break;
-      }
-      case "3": {
-        setActivePage("Målestasjoner");
-        break;
-      }
+    const page = pages.find((p) => p.shortcut === input);
+    if (page) {
+      setActivePage(page);
     }
   });
+
   return (
     <Box flexDirection="column">
       <Box
@@ -43,15 +41,17 @@ export default function App() {
           <Text>bovans værdings</Text>
         </Box>
         <Box gap={2}>
-          <ShortcutText input="1" description="Temperatur" />
-          <ShortcutText input="2" description="Kommuner" />
-          <ShortcutText input="3" description="Målestasjoner" />
+          {pages.map((page) => (
+            <ShortcutText
+              key={page.shortcut}
+              input={page.shortcut}
+              description={page.page}
+            />
+          ))}
           <ShortcutText input="Ctrl-C" description="Avslutt" />
         </Box>
       </Box>
-      {activePage === "Kommuner" && <Kommunevalg />}
-      {activePage === "Målestasjoner" && <Stasjoner />}
-      {activePage === "Temperatur" && <Temperatur />}
+      {activePage.component}
     </Box>
   );
 }
