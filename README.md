@@ -72,6 +72,7 @@ MQTT_PASS=password_to_said_user
 ```
 
 This enables adding all the favorited sensors as a single card:
+
 ![HomeAssistant](./docs/home-assist.png)
 
 ## Dev notes
