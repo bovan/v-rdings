@@ -19,7 +19,10 @@ export default function useKommuner() {
     setKommuner(await getKommuner());
   }, []);
 
-  function favoriteKommune(favoritt: boolean, kommune?: Partial<Kommune>) {
+  async function favoriteKommune(
+    favoritt: boolean,
+    kommune?: Partial<Kommune>,
+  ) {
     if (!kommune) {
       return;
     }
@@ -27,7 +30,7 @@ export default function useKommuner() {
     const updated = { ...kommune, favoritt };
     if (isKommune(updated)) {
       updateKommuneFavoritt(updated);
-      updateKommuneList();
+      await updateKommuneList();
     }
   }
 

@@ -3,15 +3,17 @@ import Container from "./components/container";
 import useKommuner from "./hooks/use-kommuner";
 import { Kommune } from "./db/geonorge";
 import TextInput from "ink-text-input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { insertStasjoner } from "./db/db";
 import { fetchAndAddSources } from "./db";
 import Spinner from "ink-spinner";
 
+const tabs = ["Selected", "Add", "List"] as const;
+
 export default function Kommunevalg() {
   const { favoriteKommune, kommuner } = useKommuner();
   const [filter, setFilter] = useState("");
-  const [inputHasFocus, setInputHasFocus] = useState(true);
+  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Add");
 
   const favorittKommuner =
     kommuner?.filter((kommune) => kommune.favoritt) ?? [];
@@ -28,24 +30,14 @@ export default function Kommunevalg() {
 
   useInput(async (input, key) => {
     if (key.tab) {
-      setInputHasFocus(!inputHasFocus);
+      const nextIndex = (tabs.indexOf(activeTab) + 1) % tabs.length;
+      setActiveTab(tabs[nextIndex] ?? "Add");
     }
 
     // TODO: move this to AddKommune component
-    if (inputHasFocus) {
+    if (activeTab === "Add") {
       if (key.return) {
-        if (filteredKommuner.length === 1 && favorittKommuner.length <= 3) {
-          // Add to favorites
-          const kommune = filteredKommuner[0];
-          if (!kommune) {
-            return;
-          }
-          favoriteKommune(true, kommune);
-          const data = await fetchAndAddSources(kommune.kommunenavn);
-          insertStasjoner(data);
-
-          setFilter("");
-        }
+        setActiveTab("List");
       }
       if (key.escape) {
         setFilter("");
@@ -64,20 +56,33 @@ export default function Kommunevalg() {
     <Container>
       <SelectedKommuner
         kommuner={favorittKommuner}
-        isActive={!inputHasFocus}
+        isActive={activeTab === "Selected"}
         handleRemove={(kommune) => favoriteKommune(false, kommune)}
       />
       <AddKommune
-        canAdd={favorittKommuner.length < 3}
-        isActive={inputHasFocus}
+        isActive={activeTab === "Add"}
         setFilter={setFilter}
         filter={filter}
         kommuner={visibleKommuner}
+      />
+      <KommuneList
+        kommuner={visibleKommuner}
+        isActive={activeTab === "List"}
+        onToggleKommune={async (kommune) => {
+          await favoriteKommune(!kommune.favoritt, kommune);
+        }}
       />
     </Container>
   );
 }
 
+function chunkArray(arr: Kommune[], size: number) {
+  const chunkedArr = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunkedArr.push(arr.slice(i, i + size));
+  }
+  return chunkedArr;
+}
 function SelectedKommuner({
   kommuner,
   isActive,
@@ -88,6 +93,24 @@ function SelectedKommuner({
   handleRemove: (_kommune?: Kommune) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [activeYIndex, setActiveYIndex] = useState(0);
+
+  const rows = chunkArray(
+    kommuner.toSorted((a, b) => (a.kommunenummer > b.kommunenummer ? 1 : -1)),
+    3,
+  );
+  useEffect(() => {
+    if (rows[activeYIndex] && activeIndex >= rows[activeYIndex].length) {
+      setActiveIndex((prev) => {
+        if (!rows[activeYIndex]) {
+          // silly typescript guard
+          return prev;
+        }
+        const maxIndex = rows[activeYIndex].length - 1;
+        return Math.min(prev, maxIndex);
+      });
+    }
+  }, [kommuner, activeIndex, activeYIndex]);
   useInput((input, key) => {
     if (!isActive) {
       return;
@@ -98,25 +121,34 @@ function SelectedKommuner({
     if (key.rightArrow) {
       setActiveIndex((prev) => (prev < kommuner.length - 1 ? prev + 1 : prev));
     }
+    if (key.downArrow) {
+      setActiveYIndex((prev) => {
+        const nextIndex = prev + 1;
+        return nextIndex < kommuner.length ? nextIndex : prev;
+      });
+    }
+    if (key.upArrow) {
+      setActiveYIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    }
     if (input === "x") {
       const kommune = kommuner[activeIndex];
       handleRemove(kommune);
     }
   });
-  // TODO: Add navigation so i.e. Stad can be selected
-
   return (
     <Tab isActive={isActive}>
-      <Text>Valgte kommuner (Opptil 3 max):</Text>
-      <Box flexDirection="row" paddingY={1}>
-        {kommuner.map((kommune, index) => (
-          <KommuneRow
-            key={kommune.kommunenummer}
-            kommune={kommune}
-            isSelected={activeIndex === index}
-          />
-        ))}
-      </Box>
+      <Text>Valgte kommuner:</Text>
+      {rows.map((kommuner, rowIndex) => (
+        <Box key={rowIndex} flexDirection="row">
+          {kommuner.map((kommune, index) => (
+            <KommuneRow
+              key={kommune.kommunenummer}
+              kommune={kommune}
+              isSelected={activeIndex === index && activeYIndex === rowIndex}
+            />
+          ))}
+        </Box>
+      ))}
       <Box height={1}>
         {isActive && <Text>&larr; / &rarr;) Naviger, x) Fjern favoritt</Text>}
       </Box>
@@ -125,25 +157,16 @@ function SelectedKommuner({
 }
 
 function AddKommune({
-  canAdd,
   isActive,
   setFilter,
   filter,
   kommuner,
 }: {
-  canAdd: boolean;
   isActive: boolean;
   setFilter: (_value: string) => void;
   filter: string;
   kommuner: Kommune[];
 }) {
-  if (!canAdd) {
-    return (
-      <Tab isActive={isActive}>
-        <Text>Kan ikke legge til flere enn 3 kommuner foreløpig.</Text>
-      </Tab>
-    );
-  }
   return (
     <Tab isActive={isActive}>
       <Text>Legg til kommune:</Text>
@@ -156,16 +179,54 @@ function AddKommune({
           placeholder="kommune"
         />
       </Box>
-      {kommuner.map((kommune) => (
-        <KommuneRow
-          key={kommune.kommunenummer}
-          kommune={kommune}
-          isHovering={kommuner.length === 1}
-        />
-      ))}
       {kommuner.length === 0 && (
         <Text color="red">Ingen kommuner funnet med filteret "{filter}"</Text>
       )}
+    </Tab>
+  );
+}
+
+function KommuneList({
+  kommuner,
+  isActive,
+  onToggleKommune,
+}: {
+  kommuner: Kommune[];
+  isActive: boolean;
+  onToggleKommune: (kommune: Kommune) => Promise<void>;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  useInput(async (input, key) => {
+    if (kommuner.length === 0 || !isActive) {
+      // let input component do its thing
+      return;
+    }
+    if (key.downArrow) {
+      setActiveIndex((prev) => Math.min(prev + 1, kommuner.length - 1));
+    }
+    if (key.upArrow) {
+      setActiveIndex((prev) => Math.max(prev - 1, 0));
+    }
+    if (key.return || input === " ") {
+      const kommune = kommuner[activeIndex];
+      if (kommune) {
+        // Add to favorites
+        await onToggleKommune(kommune);
+        const data = await fetchAndAddSources(kommune.kommunenavn);
+        insertStasjoner(data);
+      }
+    }
+  });
+
+  return (
+    <Tab isActive={isActive}>
+      {kommuner.map((kommune, index) => (
+        <KommuneRow
+          key={kommune.kommunenummer}
+          kommune={kommune}
+          isHovering={isActive && activeIndex === index}
+        />
+      ))}
     </Tab>
   );
 }
