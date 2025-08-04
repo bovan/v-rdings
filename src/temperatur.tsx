@@ -5,6 +5,8 @@ import Container from "./components/container";
 import useSources from "./hooks/use-stasjoner";
 import Spinner from "ink-spinner";
 import StasjonTempRow from "./stasjon-temp-row";
+import { mqttPublishState } from "./mqtt/mqtt-client";
+import { client as mqttClient } from "./mqtt/mqtt-client";
 
 const sortType = ["Sted", "Temperatur", "Oppdatert"] as const;
 type SortType = (typeof sortType)[number];
@@ -16,12 +18,10 @@ function combineList(
   temperatures: AirTemperature[],
   sortedBy: SortType,
 ): StasjonTemp[] {
-  const data = sources.map((source) => {
-    return {
-      source: source,
-      temp: temperatures.find((temp) => temp.sourceId === source.id),
-    };
-  });
+  const data = sources.map((source) => ({
+    source: source,
+    temp: temperatures.find((temp) => temp.sourceId === source.id),
+  }));
   if (sortedBy === "Sted") {
     return data.sort((a, b) => a.source.name.localeCompare(b.source.name));
   } else if (sortedBy === "Temperatur") {
@@ -51,10 +51,12 @@ const MINUTES_BETWEEN_UPDATES = 5;
 export default function Temperatur() {
   const [airTemperatures, setAirTemperatures] = useState<AirTemperature[]>([]);
   const [sortedBy, setSortedBy] = useState<SortType>("Sted");
-  const { favorittStasjoner, stasjoner } = useSources();
   const [rerender, setRerender] = useState(0);
   const [initial, setInitial] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { favorittStasjoner, stasjoner } = useSources();
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -98,6 +100,7 @@ export default function Temperatur() {
     fetchAirTemperatures(ids, { signal })
       .then((newTemps) => {
         setAirTemperatures(newTemps);
+        mqttPublishState(newTemps);
       })
       .catch((error) => {
         if (error.name !== "AbortError") {
@@ -130,7 +133,7 @@ export default function Temperatur() {
 
   return (
     <Container>
-      <Box gap={2} paddingBottom={1}>
+      <Box gap={2}>
         <Box width={24}>
           <Text color={sortedBy === "Sted" ? "green" : "white"} bold={true}>
             Sted
@@ -181,11 +184,16 @@ export default function Temperatur() {
             </>
           )}
         </Box>
-        <Box>
+        <Box flexDirection="column" alignItems="flex-end">
           <Text>
             Oppdateres automatisk om{" "}
             {MINUTES_BETWEEN_UPDATES - (rerender % MINUTES_BETWEEN_UPDATES)} min
           </Text>
+          {mqttClient.connected ? (
+            <Text color="green">HomeAssistant tilkoblet</Text>
+          ) : (
+            <Text color="red">HomeAssistant ikke tilkoblet</Text>
+          )}
         </Box>
       </Box>
     </Container>

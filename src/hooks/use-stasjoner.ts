@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { selectFavorittKommuner, updateSourceFavoritt } from "../db/db";
 import { Stasjon } from "../db/frost";
 import { getStasjoner } from "../db";
+import { mqttDiscoveryPublish } from "../mqtt/mqtt-client";
 
 export function isStasjon(stasjon: unknown): stasjon is Stasjon {
   if (stasjon) {
@@ -26,6 +27,7 @@ export default function useStasjoner() {
 
     const favoritter = allStasjoner?.filter((s) => s.favoritt) ?? [];
     setFavorittStasjoner(favoritter);
+    mqttDiscoveryPublish({ stasjoner: allStasjoner });
   }, []);
 
   function setFavoriteStasjon(favoritt: boolean, stasjon?: Partial<Stasjon>) {

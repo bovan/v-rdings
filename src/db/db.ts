@@ -54,7 +54,12 @@ export function selectStasjoner(
     "SELECT * FROM stasjoner WHERE kommunenavn = ?",
   );
   try {
-    return query.all(kommunenavn);
+    const stasjoner = query.all(kommunenavn);
+    // convert sqlite 1 to true
+    return stasjoner.map((stasjon) => ({
+      ...stasjon,
+      favoritt: !!stasjon.favoritt,
+    }));
   } catch (error) {
     console.error("Error selecting stasjoner:", error);
     return [];
@@ -93,7 +98,12 @@ export function insertKommuner(data: Kommune[], db = defaultDb) {
 }
 
 export function selectKommuner(db = defaultDb): Kommune[] {
-  return db.query<Kommune, []>("SELECT * FROM kommuner").all();
+  const kommuner = db.query<Kommune, []>("SELECT * FROM kommuner").all();
+  // convert sqlite 1 to true
+  return kommuner.map((kommune) => ({
+    ...kommune,
+    favoritt: !!kommune.favoritt, // Convert 1 to true
+  }));
 }
 
 export function selectFavorittKommuner(db = defaultDb): Kommune[] {

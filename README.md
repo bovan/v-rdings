@@ -59,6 +59,21 @@ To run:
 bun start
 ```
 
+## Home Assistant (MQTT)
+
+Favorited stations will be published to Home Assistant via MQTT and
+automatically discovered if the extension is running and the secrets are set.
+
+The following needs to be added to the `.env` file in the root of the project:
+
+```config
+MQTT_USER=username_in_homeassistant
+MQTT_PASS=password_to_said_user
+```
+
+This enables adding all the favorited sensors as a single card:
+![HomeAssistant](./docs/home-assist.png)
+
 ## Dev notes
 
 Use `bun dev` to start with the possibility to inspect the code

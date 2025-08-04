@@ -48,7 +48,9 @@ export async function fetchSources(kommunenavn: string): Promise<Stasjon[]> {
     });
 }
 
-export type AirTemperature = Required<ObservationsAtRefTime>;
+export type AirTemperature = Required<ObservationsAtRefTime> & {
+  value: string | null;
+};
 
 export async function fetchAirTemperatures(
   ids: string[],
@@ -63,6 +65,7 @@ export async function fetchAirTemperatures(
       const data = (response.data ?? []) as Required<ObservationsAtRefTime>[];
       return data.map((observation) => ({
         ...observation,
+        value: observation.observations[0]?.value ?? null,
         sourceId: observation.sourceId.split(":")[0] ?? "foo",
       }));
     });

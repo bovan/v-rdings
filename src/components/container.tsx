@@ -7,6 +7,7 @@ export default function Container({ children }: { children: React.ReactNode }) {
       borderTop={false}
       borderStyle="round"
       padding={1}
+      paddingBottom={0}
     >
       {children}
     </Box>
