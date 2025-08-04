@@ -46,6 +46,8 @@ function combineList(
   return [];
 }
 
+const MINUTES_BETWEEN_UPDATES = 5;
+
 export default function Temperatur() {
   const [airTemperatures, setAirTemperatures] = useState<AirTemperature[]>([]);
   const [sortedBy, setSortedBy] = useState<SortType>("Sted");
@@ -67,11 +69,18 @@ export default function Temperatur() {
     };
   }, []);
 
+  // Handle updating of temperatures
   useEffect(() => {
     if (!initial && favorittStasjoner.length > 0) {
+      // initially, after stations are loaded, fetch temperatures
       updateTemperatures();
       setInitial(true);
-    } else if (initial && rerender > 0 && rerender % 5 === 0) {
+    } else if (
+      initial &&
+      rerender > 0 &&
+      rerender % MINUTES_BETWEEN_UPDATES === 0
+    ) {
+      // every 5 minutes, update temperatures
       updateTemperatures();
     }
   }, [favorittStasjoner, initial]);
@@ -173,7 +182,10 @@ export default function Temperatur() {
           )}
         </Box>
         <Box>
-          <Text>Oppdateres automatisk om {5 - (rerender % 5)} min</Text>
+          <Text>
+            Oppdateres automatisk om{" "}
+            {MINUTES_BETWEEN_UPDATES - (rerender % MINUTES_BETWEEN_UPDATES)} min
+          </Text>
         </Box>
       </Box>
     </Container>
