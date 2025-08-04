@@ -1,6 +1,6 @@
 import { fetchAirTemperatures, Stasjon, type AirTemperature } from "./db/frost";
 import { Box, Text, useApp, useInput } from "ink";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { formatDistance } from "date-fns";
 import Container from "./components/container";
 import useSources from "./hooks/use-stasjoner";
@@ -81,35 +81,50 @@ export default function Temperatur() {
   const [rerender, setRerender] = useState(0);
   const [initial, setInitial] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     // update the view every minute so the updated times are refreshed
     const reRenderView = () => {
       setRerender((prev) => prev + 1);
-      if (rerender % 5 === 0) {
-        updateTemperatures();
-      }
     };
     const timer = setInterval(reRenderView, 1000 * 60);
-    return () => clearInterval(timer);
+    return () => {
+      abortControllerRef.current?.abort();
+      clearInterval(timer);
+    };
   }, []);
 
   useEffect(() => {
     if (!initial && favorittStasjoner.length > 0) {
       updateTemperatures();
       setInitial(true);
+    } else if (initial && rerender > 0 && rerender % 5 === 0) {
+      updateTemperatures();
     }
   }, [favorittStasjoner, initial]);
 
-  const updateTemperatures = useCallback(() => {
+  const updateTemperatures = () => {
     setIsLoading(true);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const newAbortController = new AbortController();
+    abortControllerRef.current = newAbortController;
+
     const ids = favorittStasjoner.map((source) => source.id);
-    fetchAirTemperatures(ids)
+    const signal = abortControllerRef.current.signal;
+    fetchAirTemperatures(ids, { signal })
       .then((newTemps) => {
         setAirTemperatures(newTemps);
       })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          console.error("Error fetching temperatures:", error);
+        }
+      })
       .finally(() => setIsLoading(false));
-  }, [favorittStasjoner]);
+  };
 
   useInput((input) => {
     switch (input) {
@@ -208,7 +223,7 @@ function StasjonTempRow({
   return (
     <Box key={item.source.id} gap={2}>
       <Box width={24}>
-        <Text color={isOld ? "grey" : "white"}>{item.source.name}</Text>
+        <Text color={isOld ? "grey" : "white"}>{item.source.shortName}</Text>
       </Box>
       <Box width={5}>
         <Text color={isOld ? "grey" : "cyan"}>{observation}</Text>

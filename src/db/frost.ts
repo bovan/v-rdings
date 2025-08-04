@@ -52,10 +52,11 @@ export type AirTemperature = Required<ObservationsAtRefTime>;
 
 export async function fetchAirTemperatures(
   ids: string[],
+  init: RequestInit = {},
 ): Promise<AirTemperature[]> {
   return fetch(
     `https://frost.met.no/observations/v0.jsonld?referencetime=latest&elements=air_temperature&sources=${ids.join(",")}`,
-    { method: "GET", headers },
+    { method: "GET", headers, ...init },
   )
     .then((response) => response.json() as Promise<ObservationResponse>)
     .then((response) => {
