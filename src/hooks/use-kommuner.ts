@@ -3,7 +3,7 @@ import { Kommune } from "../db/geonorge";
 import { getKommuner } from "../db";
 import { updateKommuneFavoritt } from "../db/db";
 
-export function isKommune(kommune: unknown): kommune is Kommune {
+function isKommune(kommune: unknown): kommune is Kommune {
   if (kommune) {
     return (
       typeof (kommune as Kommune).kommunenummer === "string" &&
@@ -16,8 +16,7 @@ export function isKommune(kommune: unknown): kommune is Kommune {
 export default function useKommuner() {
   const [kommuner, setKommuner] = useState<Kommune[] | null>(null);
   const updateKommuneList = useCallback(async () => {
-    const data = await getKommuner();
-    setKommuner(data);
+    setKommuner(await getKommuner());
   }, []);
 
   function favoriteKommune(favoritt: boolean, kommune?: Partial<Kommune>) {

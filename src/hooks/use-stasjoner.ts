@@ -4,7 +4,7 @@ import { Stasjon } from "../db/frost";
 import { getStasjoner } from "../db";
 import { mqttDiscoveryPublish } from "../mqtt/mqtt-client";
 
-export function isStasjon(stasjon: unknown): stasjon is Stasjon {
+function isStasjon(stasjon: unknown): stasjon is Stasjon {
   if (stasjon) {
     return (
       typeof (stasjon as Stasjon).id === "string" &&
