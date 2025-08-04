@@ -27,6 +27,10 @@ export async function fetchAndAddSources(
   return stasjoner;
 }
 
+// Consider municipalities to be constant and always cache them.
+// Since changes also cause problems with measuring stations its
+// probably best to wipe database and re-fetch them if it ever
+// become a problem.
 export async function getKommuner(): Promise<Kommune[]> {
   const dbKommuner = selectKommuner();
   if (dbKommuner.length > 0) {
