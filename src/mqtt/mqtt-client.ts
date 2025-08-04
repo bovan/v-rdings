@@ -27,7 +27,7 @@ export function mqttPublishState(temps: AirTemperature[]) {
 }
 export function mqttDiscoveryPublish({ stasjoner }: { stasjoner: Stasjon[] }) {
   const topic = `homeassistant/device/vaerdings/config`;
-  const cmpsActive: Record<string, any> = {};
+  const cmpsActive: Record<string, object> = {};
   const cmpsAll = stasjoner.reduce(
     (acc, curr) => {
       if (curr.favoritt === false) {
@@ -44,11 +44,11 @@ export function mqttDiscoveryPublish({ stasjoner }: { stasjoner: Stasjon[] }) {
           unique_id: `vaerdings_${curr.id}_temp`,
           state_topic: `vaerdings/${curr.id}/state`,
         };
-        cmpsActive[curr.id] = acc[curr.id];
+        cmpsActive[curr.id] = acc[curr.id]!;
       }
       return acc;
     },
-    {} as Record<string, any>,
+    {} as Record<string, object>,
   );
 
   const data = {

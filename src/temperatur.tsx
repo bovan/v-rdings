@@ -8,8 +8,8 @@ import StasjonTempRow from "./stasjon-temp-row";
 import { mqttPublishState } from "./mqtt/mqtt-client";
 import { client as mqttClient } from "./mqtt/mqtt-client";
 
-const sortType = ["Sted", "Temperatur", "Oppdatert"] as const;
-type SortType = (typeof sortType)[number];
+const _sortType = ["Sted", "Temperatur", "Oppdatert"] as const;
+type SortType = (typeof _sortType)[number];
 
 export type StasjonTemp = { source: Stasjon; temp?: AirTemperature };
 

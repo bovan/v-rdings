@@ -85,7 +85,7 @@ function SelectedKommuner({
 }: {
   kommuner: Kommune[];
   isActive: boolean;
-  handleRemove: (kommune?: Kommune) => void;
+  handleRemove: (_kommune?: Kommune) => void;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   useInput((input, key) => {
@@ -133,7 +133,7 @@ function AddKommune({
 }: {
   canAdd: boolean;
   isActive: boolean;
-  setFilter: (value: string) => void;
+  setFilter: (_value: string) => void;
   filter: string;
   kommuner: Kommune[];
 }) {

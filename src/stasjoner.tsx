@@ -7,7 +7,7 @@ import Spinner from "ink-spinner";
 
 export default function Stasjoner() {
   const sortedBy = "Sted";
-  const { stasjoner, setFavoriteStasjon, favorittStasjoner } = useStasjoner();
+  const { stasjoner, setFavoriteStasjon } = useStasjoner();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useInput((input, key) => {

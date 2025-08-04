@@ -5,8 +5,8 @@ import Kommunevalg from "./kommunevalg";
 import Stasjoner from "./stasjoner";
 import ShortcutText from "./components/shortcut-text";
 
-const pages = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
-type Page = (typeof pages)[number];
+const _pages = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
+type Page = (typeof _pages)[number];
 
 export default function App() {
   const [activePage, setActivePage] = useState<Page>("Temperatur");
