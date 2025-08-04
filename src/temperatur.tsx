@@ -85,7 +85,7 @@ export default function Temperatur() {
       // every 5 minutes, update temperatures
       updateTemperatures();
     }
-  }, [favorittStasjoner, initial]);
+  }, [favorittStasjoner, initial, rerender]);
 
   const updateTemperatures = () => {
     setIsLoading(true);
