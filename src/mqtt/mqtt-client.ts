@@ -54,7 +54,7 @@ export function mqttDiscoveryPublish({ stasjoner }: { stasjoner: Stasjon[] }) {
   const data = {
     dev: {
       ids: "vaerdings",
-      name: "Vaerdings",
+      name: "Met",
       mf: "github/bovan",
       mdl: "xya",
       sw: "1.0",
