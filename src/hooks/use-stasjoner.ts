@@ -15,7 +15,7 @@ export function isStasjon(stasjon: unknown): stasjon is Stasjon {
 
 export default function useStasjoner() {
   const [stasjoner, setStasjoner] = useState<Stasjon[] | null>(null);
-
+  const [favorittStasjoner, setFavorittStasjoner] = useState<Stasjon[]>([]);
   const updateStasjoner = useCallback(async () => {
     const kommuner = selectFavorittKommuner();
     const data = await Promise.all(
@@ -23,9 +23,12 @@ export default function useStasjoner() {
     );
     const allStasjoner = data.flat();
     setStasjoner(allStasjoner);
+
+    const favoritter = allStasjoner?.filter((s) => s.favoritt) ?? [];
+    setFavorittStasjoner(favoritter);
   }, []);
 
-  function favoriteStasjon(favoritt: boolean, stasjon?: Partial<Stasjon>) {
+  function setFavoriteStasjon(favoritt: boolean, stasjon?: Partial<Stasjon>) {
     if (!stasjon) {
       return;
     }
@@ -43,5 +46,5 @@ export default function useStasjoner() {
     }
   }, []);
 
-  return { stasjoner, favoriteStasjon };
+  return { stasjoner, favorittStasjoner, setFavoriteStasjon };
 }

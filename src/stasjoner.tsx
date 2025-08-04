@@ -7,7 +7,7 @@ import Spinner from "ink-spinner";
 
 export default function Stasjoner() {
   const sortedBy = "Sted";
-  const { stasjoner, favoriteStasjon } = useStasjoner();
+  const { stasjoner, setFavoriteStasjon, favorittStasjoner } = useStasjoner();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useInput((input, key) => {
@@ -23,7 +23,7 @@ export default function Stasjoner() {
     if (key.return || input === " ") {
       const stasjon = stasjoner[activeIndex];
       if (stasjon) {
-        favoriteStasjon(!stasjon.favoritt, stasjon);
+        setFavoriteStasjon(!stasjon.favoritt, stasjon);
       }
     }
   });

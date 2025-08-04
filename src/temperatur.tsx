@@ -77,9 +77,8 @@ function combineList(
 export default function Temperatur() {
   const [airTemperatures, setAirTemperatures] = useState<AirTemperature[]>([]);
   const [sortedBy, setSortedBy] = useState<SortType>("Sted");
-  const { stasjoner } = useSources();
+  const { favorittStasjoner, stasjoner } = useSources();
   const [rerender, setRerender] = useState(0);
-  const favoritter = stasjoner?.filter((s) => s.favoritt) ?? [];
   const [initial, setInitial] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,21 +95,21 @@ export default function Temperatur() {
   }, []);
 
   useEffect(() => {
-    if (!initial && favoritter.length > 0) {
+    if (!initial && favorittStasjoner.length > 0) {
       updateTemperatures();
       setInitial(true);
     }
-  }, [favoritter]);
+  }, [favorittStasjoner, initial]);
 
   const updateTemperatures = useCallback(() => {
     setIsLoading(true);
-    const ids = favoritter.map((source) => source.id);
+    const ids = favorittStasjoner.map((source) => source.id);
     fetchAirTemperatures(ids)
       .then((newTemps) => {
         setAirTemperatures(newTemps);
       })
       .finally(() => setIsLoading(false));
-  }, [favoritter]);
+  }, [favorittStasjoner]);
 
   useInput((input) => {
     switch (input) {
@@ -131,7 +130,7 @@ export default function Temperatur() {
     }
   });
 
-  const data = combineList(favoritter, airTemperatures, sortedBy);
+  const data = combineList(favorittStasjoner, airTemperatures, sortedBy);
 
   return (
     <Container>
@@ -175,15 +174,15 @@ export default function Temperatur() {
         justifyContent="space-between"
       >
         <Box gap={2}>
-          {favoritter.length > 0 && (
-            <Text>
-              <Text color="whiteBright">r)</Text>efresh
-            </Text>
-          )}
-          {favoritter.length > 0 && (
-            <Text>
-              <Text color="whiteBright">s)</Text>ort
-            </Text>
+          {favorittStasjoner.length > 0 && (
+            <>
+              <Text>
+                <Text color="whiteBright">r)</Text>efresh
+              </Text>
+              <Text>
+                <Text color="whiteBright">s)</Text>ort
+              </Text>
+            </>
           )}
         </Box>
         <Box>
