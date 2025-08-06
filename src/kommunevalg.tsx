@@ -34,11 +34,11 @@ export default function Kommunevalg() {
       setActiveTab(tabs[nextIndex] ?? "Add");
     }
 
-    // TODO: move this to AddKommune component
     if (activeTab === "Add") {
       if (key.return) {
         setActiveTab("List");
       }
+
       if (key.escape) {
         setFilter("");
       }
@@ -69,6 +69,7 @@ export default function Kommunevalg() {
         kommuner={visibleKommuner}
         isActive={activeTab === "List"}
         onToggleKommune={async (kommune) => {
+          // TODO: cleanup stasjoner when removing
           await favoriteKommune(!kommune.favoritt, kommune);
         }}
       />

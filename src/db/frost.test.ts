@@ -10,8 +10,7 @@ test("frost can get by municipality", async () => {
   expect(voll).toBeDefined();
 });
 
-test.only("frost can get air_temperatures", async () => {
+test("frost can get air_temperatures", async () => {
   const temps = await fetchAirTemperatures([testStation]);
-  console.log(temps[0]);
   expect(temps.length).toBeGreaterThan(0);
 });
