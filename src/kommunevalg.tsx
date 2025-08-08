@@ -1,4 +1,3 @@
-import { useInput } from "ink";
 import Container from "./components/container";
 import useKommuner from "./hooks/use-kommuner";
 import { useState } from "react";
@@ -6,19 +5,9 @@ import Spinner from "ink-spinner";
 import SelectScrollBox from "./components/select-scroll-box";
 import FilterInput from "./components/filter-input";
 
-const tabs = ["Add", "List"] as const;
-
 export default function Kommunevalg() {
   const { favoriteKommune, kommuner } = useKommuner();
   const [filter, setFilter] = useState("");
-  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("Add");
-
-  useInput(async (_input, key) => {
-    if (key.tab) {
-      const nextIndex = (tabs.indexOf(activeTab) + 1) % tabs.length;
-      setActiveTab(tabs[nextIndex] ?? "Add");
-    }
-  });
 
   if (kommuner === null) {
     return (
@@ -35,6 +24,7 @@ export default function Kommunevalg() {
     <Container>
       <FilterInput setFilter={setFilter} filter={filter} />
       <SelectScrollBox
+        title="Velg kommune"
         filter={filter}
         height={20}
         items={items}

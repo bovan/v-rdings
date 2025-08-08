@@ -8,6 +8,7 @@ export function TabFrame({
   helpText = "Aktiv Tab",
   themeColor = "green",
   justifyContent,
+  title,
 }: {
   isFocused: boolean;
   height: number;
@@ -15,7 +16,10 @@ export function TabFrame({
   helpText?: string;
   themeColor?: string;
   justifyContent?: ComponentProps<typeof Box>["justifyContent"];
+  title?: string;
 }) {
+  const tabTitle =
+    title !== undefined ? title : isFocused ? "Aktiv Tab" : "Inaktiv Tab";
   return (
     <Box
       flexDirection="column"
@@ -25,6 +29,9 @@ export function TabFrame({
       borderColor={isFocused ? themeColor : "gray"}
       height={height}
     >
+      <Box marginTop={-1} marginLeft={1}>
+        <Text color={isFocused ? themeColor : "gray"}>{tabTitle}</Text>
+      </Box>
       <Box justifyContent={justifyContent} marginBottom={1} height={height - 2}>
         {children}
       </Box>

@@ -10,6 +10,7 @@ type SelectScrollBoxProps<T> = {
   onChange: (item: T, isSelected: boolean) => void;
   themeColor?: string;
   filter?: string;
+  title?: string;
 };
 
 export default function SelectScrollBox<T>({
@@ -20,6 +21,7 @@ export default function SelectScrollBox<T>({
   isSelected,
   themeColor = "green",
   filter,
+  title,
 }: SelectScrollBoxProps<T>) {
   const [marginTop, setMarginTop] = useState(0);
   const innerRef = useRef<DOMElement>(null);
@@ -92,6 +94,7 @@ export default function SelectScrollBox<T>({
 
   return (
     <TabFrame
+      title={title}
       height={height}
       isFocused={isFocused}
       helpText="Use ↑↓ to navigate, ↵ to select"

@@ -43,6 +43,7 @@ export default function Stasjoner() {
     <Container>
       <FilterInput setFilter={setFilter} filter={filter} />
       <SelectScrollBox
+        title="Velg målestasjoner"
         height={20}
         items={data}
         itemToString={(item) => item.fullName}
