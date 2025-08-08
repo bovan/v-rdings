@@ -19,6 +19,8 @@ export default function useStasjoner() {
   const [favorittStasjoner, setFavorittStasjoner] = useState<Stasjon[]>([]);
 
   const updateStasjoner = useCallback(async () => {
+    // start with municipalities, there might be stations favorited outside of current municipalities
+    // this allows us to keep old favorite stations
     const kommuner = selectFavorittKommuner();
     const data = await Promise.all(
       kommuner.map((k) => getStasjoner(k.kommunenavn)),
