@@ -17,12 +17,22 @@ function isStasjon(stasjon: unknown): stasjon is Stasjon {
 export default function useStasjoner() {
   const [stasjoner, setStasjoner] = useState<Stasjon[] | null>(null);
   const [favorittStasjoner, setFavorittStasjoner] = useState<Stasjon[]>([]);
+
   const updateStasjoner = useCallback(async () => {
     const kommuner = selectFavorittKommuner();
     const data = await Promise.all(
       kommuner.map((k) => getStasjoner(k.kommunenavn)),
     );
-    const allStasjoner = data.flat();
+    const allStasjoner = data.flat().toSorted((a, b) => {
+      const kommunenavnCompare = a.kommunenavn.localeCompare(
+        b.kommunenavn,
+        "nb-NO",
+      );
+      if (kommunenavnCompare !== 0) {
+        return kommunenavnCompare;
+      }
+      return a.shortName.localeCompare(b.shortName, "nb-NO");
+    });
     setStasjoner(allStasjoner);
 
     const favoritter = allStasjoner?.filter((s) => s.favoritt) ?? [];

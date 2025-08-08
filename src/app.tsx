@@ -5,8 +5,8 @@ import Kommunevalg from "./kommunevalg";
 import Stasjoner from "./stasjoner";
 import ShortcutText from "./components/shortcut-text";
 
-const pageKeys = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
-type PageKey = (typeof pageKeys)[number];
+const _pageKeys = ["Kommuner", "Målestasjoner", "Temperatur"] as const;
+type PageKey = (typeof _pageKeys)[number];
 
 type Page = { shortcut: string; page: PageKey; component: JSX.Element };
 const pages: Page[] = [

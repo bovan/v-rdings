@@ -1,14 +1,15 @@
-import { Box, Text, useInput } from "ink";
+import { useInput } from "ink";
 import Container from "./components/container";
 import { useState } from "react";
 import useStasjoner from "./hooks/use-stasjoner";
-import { Stasjon } from "./db/frost";
 import Spinner from "ink-spinner";
+import SelectScrollBox from "./components/select-scroll-box";
+import FilterInput from "./components/filter-input";
 
 export default function Stasjoner() {
-  const sortedBy = "Sted";
   const { stasjoner, setFavoriteStasjon } = useStasjoner();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [filter, setFilter] = useState("");
 
   useInput((input, key) => {
     if (stasjoner === null) {
@@ -31,62 +32,25 @@ export default function Stasjoner() {
   if (stasjoner === null) {
     return <Spinner type="aesthetic" />;
   }
+  const data = stasjoner
+    .map((s) => ({
+      ...s,
+      fullName: `${s.kommunenavn} - ${s.shortName}`,
+    }))
+    .filter((s) => s.fullName.toLowerCase().includes(filter.toLowerCase()));
 
   return (
     <Container>
-      <Box gap={2} paddingBottom={1}>
-        <Box width={24}>
-          <Text color={sortedBy === "Sted" ? "green" : "white"} bold={true}>
-            Sted
-          </Text>
-        </Box>
-      </Box>
-      <Box gap={4}>
-        <Text color="white" bold={true}>
-          &uarr;/&darr;) Naviger
-        </Text>
-        <Text color="white" bold={true}>
-          Enter/Space) Velg
-        </Text>
-      </Box>
-      <Box width={42} flexDirection="row" gap={2}>
-        <Box width={4}></Box>
-        <Box width={8}>
-          <Text>Valgt</Text>
-        </Box>
-        <Box width={30}>
-          <Text>Målestasjon</Text>
-        </Box>
-      </Box>
-      {stasjoner.map((item, index) => (
-        <MaalestasjonRow
-          key={item.id}
-          item={item}
-          isHover={activeIndex === index}
-        />
-      ))}
+      <FilterInput setFilter={setFilter} filter={filter} />
+      <SelectScrollBox
+        height={20}
+        items={data}
+        itemToString={(item) => item.fullName}
+        onChange={(item, isSelected) => {
+          setFavoriteStasjon(isSelected, item);
+        }}
+        isSelected={(item) => item.favoritt}
+      />
     </Container>
-  );
-}
-
-function MaalestasjonRow({
-  item,
-  isHover,
-}: {
-  item: Stasjon;
-  isHover?: boolean;
-}) {
-  return (
-    <Box key={item.id} width={42} flexDirection="row" gap={2}>
-      <Box width={4}>{isHover && <Text color="green">&gt;</Text>}</Box>
-      <Box width={8}>
-        <Text>{item.favoritt ? "Ja" : ""}</Text>
-      </Box>
-      <Box width={30}>
-        <Text color={item.favoritt ? "green" : isHover ? "cyan" : "white"}>
-          {item.shortName}
-        </Text>
-      </Box>
-    </Box>
   );
 }

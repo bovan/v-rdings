@@ -16,7 +16,11 @@ function isKommune(kommune: unknown): kommune is Kommune {
 export default function useKommuner() {
   const [kommuner, setKommuner] = useState<Kommune[] | null>(null);
   const updateKommuneList = useCallback(async () => {
-    setKommuner(await getKommuner());
+    const k = await getKommuner();
+    k.sort((a, b) => {
+      return a.kommunenavn.localeCompare(b.kommunenavn, "nb-NO");
+    });
+    setKommuner(k);
   }, []);
 
   async function favoriteKommune(
