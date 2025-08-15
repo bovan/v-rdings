@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { selectFavorittKommuner, updateSourceFavoritt } from "../db/db";
-import { Stasjon } from "../db/frost";
+import type { Stasjon } from "../db/frost";
 import { getStasjoner } from "../db";
 import { mqttDiscoveryPublish } from "../mqtt/mqtt-client";
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Kommune } from "../db/geonorge";
+import { type Kommune } from "../db/geonorge";
 import { getKommuner } from "../db";
 import { updateKommuneFavoritt } from "../db/db";
 

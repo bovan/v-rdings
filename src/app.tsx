@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import Temperatur from "./temperatur";
-import { JSX, useState } from "react";
+import { type JSX, useState } from "react";
 import Kommunevalg from "./kommunevalg";
 import Stasjoner from "./stasjoner";
 import ShortcutText from "./components/shortcut-text";

@@ -4,8 +4,8 @@ import {
   selectKommuner,
   selectStasjoner,
 } from "./db";
-import { fetchSources, Stasjon } from "./frost";
-import { fetchKommuner, Kommune } from "./geonorge";
+import { fetchSources, type Stasjon } from "./frost";
+import { fetchKommuner, type Kommune } from "./geonorge";
 
 export async function getStasjoner(kommunenavn: string): Promise<Stasjon[]> {
   return selectStasjoner(kommunenavn);

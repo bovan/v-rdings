@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
-import { Stasjon } from "./frost";
-import { Kommune } from "./geonorge";
+import { type Stasjon } from "./frost";
+import { type Kommune } from "./geonorge";
 
 export const defaultDb = new Database("tmp/db.sqlite");
 

@@ -1,6 +1,6 @@
 import { Box, Text } from "ink";
 import { formatDistance } from "date-fns";
-import { StasjonTemp } from "./temperatur";
+import type { StasjonTemp } from "./temperatur";
 import Spinner from "ink-spinner";
 
 function getDateColor(

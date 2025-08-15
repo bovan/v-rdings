@@ -1,4 +1,5 @@
-import { fetchAirTemperatures, Stasjon, type AirTemperature } from "./db/frost";
+import { fetchAirTemperatures, type AirTemperature } from "./db/frost";
+import type { Stasjon } from "./db/frost";
 import { Box, Text, useInput } from "ink";
 import { useEffect, useRef, useState } from "react";
 import Container from "./components/container";

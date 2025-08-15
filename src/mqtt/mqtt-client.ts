@@ -1,5 +1,5 @@
-import mqtt, { IClientOptions } from "mqtt";
-import { AirTemperature, Stasjon } from "../db/frost";
+import mqtt, { type IClientOptions } from "mqtt";
+import { type AirTemperature, type Stasjon } from "../db/frost";
 
 const opts: IClientOptions = {
   username: process.env["MQTT_USER"],
