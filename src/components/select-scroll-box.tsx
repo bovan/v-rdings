@@ -1,5 +1,7 @@
-import { Box, DOMElement, measureElement, Text, useInput, useFocus } from "ink";
-import { ComponentProps, ReactNode, useEffect, useRef, useState } from "react";
+import { Box, measureElement, Text, useInput, useFocus } from "ink";
+import type { DOMElement } from "ink";
+import { useEffect, useRef, useState } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { TabFrame } from "./tab-frame";
 
 type SelectScrollBoxProps<T> = {
