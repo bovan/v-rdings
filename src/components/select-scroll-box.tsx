@@ -61,6 +61,8 @@ export default function SelectScrollBox<T>({
 
     const minMarginTop = visibleHeight - contentHeight;
     const listHeight = visibleHeight - 2; // 1 for scrollbar
+    const pageSize = Math.max(1, listHeight - 2);
+
     if (key.downArrow) {
       // Only move view down if selector pass the half-way point
       if (activeIndex > listHeight / 2) {
@@ -71,10 +73,29 @@ export default function SelectScrollBox<T>({
     if (key.upArrow) {
       // Only move view up if selector pass the half-way point
       if (activeIndex < Math.abs(marginTop) + listHeight / 2) {
-        // if (items.length - activeIndex > listHeight / 2) {
         setMarginTop((prev) => Math.min(prev + 1, 0));
       }
       setActiveIndex((prev) => Math.max(prev - 1, 0));
+    }
+
+    if (key.pageDown) {
+      // move down by a page
+      setActiveIndex((prev) => {
+        const next = Math.min(prev + pageSize, items.length - 1);
+        // adjust marginTop to ensure active remains visible: move down by pageSize but not past minMarginTop
+        setMarginTop((mPrev) => Math.max(mPrev - pageSize, minMarginTop));
+        return next;
+      });
+    }
+
+    if (key.pageUp) {
+      // move up by a page
+      setActiveIndex((prev) => {
+        const next = Math.max(prev - pageSize, 0);
+        // adjust marginTop to ensure active remains visible: move up by pageSize but not past 0
+        setMarginTop((mPrev) => Math.min(mPrev + pageSize, 0));
+        return next;
+      });
     }
 
     if (key.return) {
