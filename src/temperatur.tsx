@@ -1,4 +1,4 @@
-import { fetchAirTemperatures, type AirTemperature } from "./db/frost";
+import { type AirTemperature } from "./db/frost";
 import type { Stasjon } from "./db/frost";
 import { Box, Text, useInput } from "ink";
 import { useEffect, useRef, useState } from "react";
@@ -6,8 +6,8 @@ import Container from "./components/container";
 import useSources from "./hooks/use-stasjoner";
 import Spinner from "ink-spinner";
 import StasjonTempRow from "./stasjon-temp-row";
-import { mqttPublishState } from "./mqtt/mqtt-client";
 import { client as mqttClient } from "./mqtt/mqtt-client";
+import useTemperaturer from "./hooks/use-temperatur";
 
 const _sortType = ["Sted", "Temperatur", "Oppdatert"] as const;
 type SortType = (typeof _sortType)[number];
@@ -50,13 +50,13 @@ function combineList(
 const MINUTES_BETWEEN_UPDATES = 5;
 
 export default function Temperatur() {
-  const [airTemperatures, setAirTemperatures] = useState<AirTemperature[]>([]);
   const [sortedBy, setSortedBy] = useState<SortType>("Sted");
   const [rerender, setRerender] = useState(0);
   const [initial, setInitial] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const { favorittStasjoner, stasjoner } = useSources();
+  const { airTemperatures, updateAirTemperatures, isLoading } =
+    useTemperaturer(favorittStasjoner);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -76,7 +76,7 @@ export default function Temperatur() {
   useEffect(() => {
     if (!initial && favorittStasjoner.length > 0) {
       // initially, after stations are loaded, fetch temperatures
-      updateTemperatures();
+      updateAirTemperatures();
       setInitial(true);
     } else if (
       initial &&
@@ -84,37 +84,14 @@ export default function Temperatur() {
       rerender % MINUTES_BETWEEN_UPDATES === 0
     ) {
       // every 5 minutes, update temperatures
-      updateTemperatures();
+      updateAirTemperatures();
     }
   }, [favorittStasjoner, initial, rerender]);
-
-  const updateTemperatures = () => {
-    setIsLoading(true);
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    const newAbortController = new AbortController();
-    abortControllerRef.current = newAbortController;
-
-    const ids = favorittStasjoner.map((source) => source.id);
-    const signal = abortControllerRef.current.signal;
-    fetchAirTemperatures(ids, { signal })
-      .then((newTemps) => {
-        setAirTemperatures(newTemps);
-        mqttPublishState(newTemps);
-      })
-      .catch((error) => {
-        if (error.name !== "AbortError") {
-          console.error("Error fetching temperatures:", error);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  };
 
   useInput((input) => {
     switch (input) {
       case "r": {
-        updateTemperatures();
+        updateAirTemperatures();
         break;
       }
       case "s": {
