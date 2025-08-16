@@ -1,15 +1,21 @@
 import { useInput } from "ink";
 import Container from "./components/container";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useStasjoner from "./hooks/use-stasjoner";
 import Spinner from "ink-spinner";
 import SelectScrollBox from "./components/select-scroll-box";
 import FilterInput from "./components/filter-input";
+import useTemperaturer from "./hooks/use-temperatur";
+import type { AirTemperature, Stasjon } from "./db/frost";
+import { formatDate } from "./date-utils";
 
 export default function Stasjoner() {
   const { stasjoner, setFavoriteStasjon } = useStasjoner();
   const [activeIndex, setActiveIndex] = useState(0);
   const [filter, setFilter] = useState("");
+  const { airTemperatures, updateAirTemperatures } = useTemperaturer(
+    stasjoner ?? [],
+  );
 
   useInput((input, key) => {
     if (stasjoner === null) {
@@ -29,6 +35,10 @@ export default function Stasjoner() {
     }
   });
 
+  useEffect(() => {
+    updateAirTemperatures();
+  }, [stasjoner]);
+
   if (stasjoner === null) {
     return <Spinner type="aesthetic" />;
   }
@@ -47,6 +57,7 @@ export default function Stasjoner() {
         height={20}
         items={data}
         itemToString={(item) => item.fullName}
+        itemToMetaString={stasjonToMeta(airTemperatures)}
         onChange={(item, isSelected) => {
           setFavoriteStasjon(isSelected, item);
         }}
@@ -54,4 +65,15 @@ export default function Stasjoner() {
       />
     </Container>
   );
+}
+
+function stasjonToMeta(temps: AirTemperature[]) {
+  return function (item: Stasjon) {
+    const reading = temps.find((t) => t.sourceId === item.id);
+    if (reading) {
+      return `(Oppdatert: ${formatDate(reading.referenceTime, { addSuffix: false, strict: true })})`;
+    } else {
+      return "";
+    }
+  };
 }

@@ -8,6 +8,7 @@ type SelectScrollBoxProps<T> = {
   height: number;
   items: T[];
   itemToString: (item: T) => string;
+  itemToMetaString?: (item: T) => string;
   isSelected: (item: T) => boolean;
   onChange: (item: T, isSelected: boolean) => void;
   themeColor?: string;
@@ -19,6 +20,7 @@ export default function SelectScrollBox<T>({
   height,
   items,
   itemToString,
+  itemToMetaString,
   onChange,
   isSelected,
   themeColor = "green",
@@ -115,6 +117,7 @@ export default function SelectScrollBox<T>({
               key={`${index}-${itemToString(item)}`}
               isActive={index === activeIndex}
               isSelected={isSelected(item)}
+              meta={itemToMetaString?.(item)}
             >
               <Text>{itemToString(item)}</Text>
             </SelectItem>
@@ -150,14 +153,16 @@ function SelectItem({
   isSelected,
   children,
   themeColor = "green",
+  meta,
 }: {
   isActive?: boolean;
   isSelected?: boolean;
   children: ReactNode;
   themeColor: string;
+  meta?: string;
 }) {
   return (
-    <Box flexDirection="row" gap={1}>
+    <Box flexDirection="row" gap={1} width="100%">
       <Box width={2}>
         {isActive && (
           <Text bold color={themeColor}>
@@ -166,9 +171,10 @@ function SelectItem({
         )}
       </Box>
       <SelectItemBullet isSelected={isSelected} />
-      <Box>
+      <Box flexGrow={1}>
         <Text color={isActive ? "green" : "white"}>{children}</Text>
       </Box>
+      <Box>{meta && <Text>{meta}</Text>}</Box>
     </Box>
   );
 }

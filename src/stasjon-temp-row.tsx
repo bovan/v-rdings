@@ -1,7 +1,7 @@
 import { Box, Text } from "ink";
-import { formatDistance } from "date-fns";
 import type { StasjonTemp } from "./temperatur";
 import Spinner from "ink-spinner";
+import { formatDate } from "./date-utils";
 
 function getDateColor(
   dateString: string | null | undefined,
@@ -20,15 +20,6 @@ function getDateColor(
   } else {
     return "red";
   }
-}
-
-function formatDate(dateString: string | null | undefined): string {
-  if (!dateString) {
-    return "--";
-  }
-  const recentDate = new Date(dateString);
-  const distance = formatDistance(recentDate, new Date(), { addSuffix: true });
-  return distance;
 }
 
 export default function StasjonTempRow({

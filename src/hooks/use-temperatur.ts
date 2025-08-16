@@ -21,6 +21,11 @@ export default function useTemperaturer(stasjoner: Stasjon[]) {
   }, []);
 
   const updateAirTemperatures = () => {
+    if (stasjoner.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
