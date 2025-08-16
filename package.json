@@ -6,7 +6,8 @@
   "scripts": {
     "start": "bun run src/index.tsx",
     "dev": "bun --inspect --watch src/index.tsx",
-    "openapi-ts": "openapi-ts"
+    "openapi-ts": "openapi-ts",
+    "tsc": "tsc"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
