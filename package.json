@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun run src/index.tsx",
     "dev": "bun --inspect --watch src/index.tsx",
+    "lint": "bun eslint",
     "openapi-ts": "openapi-ts",
     "tsc": "tsc"
   },
