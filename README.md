@@ -23,7 +23,7 @@ This enables the selection of a specific measurement station.
 Some are updated at a too slow of interval to be useful, so you can select
 the ones you want to use.
 
-![Stasjoner](./docs/stasjoner-v2.png)
+![Stasjoner](./docs/stasjoner-v3.png)
 
 ### Temperatur (Temperature)
 
