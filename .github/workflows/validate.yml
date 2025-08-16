@@ -1,0 +1,19 @@
+name: Bun validate
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-start:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+        with:
+            bun-version: latest
+      - run: bun openapi-ts # update the types based on API
+      - run: bun tsc # test that typescript still compiles it
+      - run: bun lint
